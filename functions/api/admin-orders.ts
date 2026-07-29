@@ -6,5 +6,6 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const identity = await user.json() as { email?: string };
   if (!user.ok || identity.email?.toLowerCase() !== env.ADMIN_EMAIL.toLowerCase()) return Response.json({ error: "Owner access required." }, { status: 403 });
   const orders = await fetch(`${env.SUPABASE_URL}/rest/v1/orders?select=*&order=created_at.desc&limit=100`, { headers: { apikey: env.SUPABASE_SERVICE_ROLE_KEY, Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}` } });
-  return new Response(orders.body, { status: orders.status, headers: { "Content-Type": "application/json" } });
+  if (!orders.ok) return Response.json({ error: "Could not load orders." }, { status: 500 });
+  return Response.json({ orders: await orders.json() });
 };
