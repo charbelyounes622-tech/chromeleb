@@ -1,5 +1,6 @@
 interface Env { SUPABASE_URL: string; SUPABASE_SERVICE_ROLE_KEY: string; ADMIN_EMAIL: string; }
-export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
+type FunctionContext<T> = { request: Request; env: T };
+export const onRequestGet = async ({ request, env }: FunctionContext<Env>) => {
   const token = request.headers.get("Authorization")?.replace("Bearer ", "");
   if (!token) return Response.json({ error: "Sign in required." }, { status: 401 });
   const user = await fetch(`${env.SUPABASE_URL}/auth/v1/user`, { headers: { apikey: env.SUPABASE_SERVICE_ROLE_KEY, Authorization: `Bearer ${token}` } });

@@ -1,10 +1,11 @@
 import { calculateTotals } from "../../lib/pricing";
 
 interface Env { SUPABASE_URL: string; SUPABASE_SERVICE_ROLE_KEY: string; }
+type FunctionContext<T> = { request: Request; env: T };
 const productIds = new Set(["nocturne", "lucent", "smoke-arc", "umber"]);
 const clean = (value: unknown, max: number) => typeof value === "string" ? value.trim().replace(/[<>]/g, "").slice(0, max) : "";
 
-export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+export const onRequestPost = async ({ request, env }: FunctionContext<Env>) => {
   try {
     const input = await request.json() as Record<string, unknown>;
     const items = Array.isArray(input.items) ? input.items.filter((item): item is { productId: string; quantity: number } => !!item && typeof item === "object" && productIds.has((item as { productId?: string }).productId ?? "") && Number.isInteger((item as { quantity?: number }).quantity) && ((item as { quantity: number }).quantity > 0) && ((item as { quantity: number }).quantity <= 10)).map((item) => ({ productId: item.productId, quantity: item.quantity })) : [];
