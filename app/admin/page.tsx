@@ -62,7 +62,7 @@ export default function AdminPage() {
   if (!signedIn) return (
     <main className="admin-gate">
       <p className="eyebrow">Chrome Leb private office</p><h1>Owner access only.</h1>
-      <p>Use the Netlify Identity account invited for this store.</p>
+      <p>Sign in with the owner account you created in Supabase.</p>
       <form onSubmit={submit} className="admin-login"><label>Email<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></label><label>Password<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></label><button type="submit">Sign in securely</button></form>
       {message && <p>{message}</p>}
     </main>
