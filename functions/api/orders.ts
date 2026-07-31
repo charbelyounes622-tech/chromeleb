@@ -14,7 +14,7 @@ export const onRequestPost = async ({ request, env }: FunctionContext<Env>) => {
     if (customerName.length < 2 || phone.length < 7 || city.length < 2 || address.length < 8 || itemCount < 1 || itemCount > 20) return Response.json({ error: "Please check your delivery details and bag." }, { status: 400 });
     const totals = calculateTotals(itemCount);
     const orderNumber = `CHL-${Date.now().toString(36).toUpperCase()}-${crypto.randomUUID().slice(0, 4).toUpperCase()}`;
-    const response = await fetch(`${env.SUPABASE_URL}/rest/v1/orders`, { method: "POST", headers: { apikey: env.SUPABASE_SERVICE_ROLE_KEY, Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`, "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify({ order_number: orderNumber, customer_name: customerName, phone, email: email || null, city, address, notes: notes || null, items, item_count: itemCount, subtotal_cents: totals.subtotalCents, delivery_cents: totals.deliveryCents, total_cents: totals.totalCents }) });
+    const response = await fetch(`${env.SUPABASE_URL}/rest/v1/orders`, { method: "POST", headers: { apikey: env.SUPABASE_SERVICE_ROLE_KEY, "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify({ order_number: orderNumber, customer_name: customerName, phone, email: email || null, city, address, notes: notes || null, items, item_count: itemCount, subtotal_cents: totals.subtotalCents, delivery_cents: totals.deliveryCents, total_cents: totals.totalCents }) });
     if (!response.ok) throw new Error();
     return Response.json({ orderNumber }, { status: 201 });
   } catch { return Response.json({ error: "Order could not be placed. Please try again." }, { status: 500 }); }
