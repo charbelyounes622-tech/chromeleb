@@ -13,7 +13,7 @@ export default function AdminPage() {
 
   async function loadOrders(accessCode: string) {
     const response = await fetch("/api/admin-orders", { headers: { "X-Admin-Code": accessCode } });
-    const data = await response.json();
+    const data = await response.json().catch(() => ({ error: "The dashboard service could not be reached." }));
     if (!response.ok) throw new Error(data.error ?? "Could not open dashboard.");
     setOrders(data.orders ?? []);
   }

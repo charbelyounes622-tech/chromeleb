@@ -17,8 +17,14 @@ export default {
         headers: { "Cache-Control": "no-store" },
       });
     }
-    if (path === "/api/orders" && request.method === "POST") return createOrder({ request, env });
-    if (path === "/api/admin-orders" && request.method === "GET") return listOrders({ request, env });
+    if (path.startsWith("/api/orders") && request.method === "POST") return createOrder({ request, env });
+    if (path.startsWith("/api/admin-orders") && request.method === "GET") {
+      try {
+        return await listOrders({ request, env });
+      } catch {
+        return Response.json({ error: "The dashboard service is not available yet." }, { status: 500 });
+      }
+    }
     return env.ASSETS.fetch(request);
   },
 };
