@@ -12,15 +12,16 @@ interface Env {
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const path = new URL(request.url).pathname;
+    const configuredEnv = { ...env, SUPABASE_URL: env.SUPABASE_URL || "https://gzsbjwefmegxclhpoye.supabase.co" };
     if (path === "/api/public-config" && request.method === "GET") {
-      return Response.json({ supabaseUrl: env.SUPABASE_URL, supabaseAnonKey: env.SUPABASE_ANON_KEY }, {
+      return Response.json({ supabaseUrl: configuredEnv.SUPABASE_URL, supabaseAnonKey: env.SUPABASE_ANON_KEY }, {
         headers: { "Cache-Control": "no-store" },
       });
     }
-    if (path.startsWith("/api/orders") && request.method === "POST") return createOrder({ request, env });
+    if (path.startsWith("/api/orders") && request.method === "POST") return createOrder({ request, env: configuredEnv });
     if (path.startsWith("/api/admin-orders") && request.method === "GET") {
       try {
-        return await listOrders({ request, env });
+        return await listOrders({ request, env: configuredEnv });
       } catch {
         return Response.json({ error: "The dashboard service is not available yet." }, { status: 500 });
       }
