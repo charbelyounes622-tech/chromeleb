@@ -1,5 +1,6 @@
 import { onRequestPost as createOrder } from "../functions/api/orders";
-import { onRequestGet as listOrders } from "../functions/api/admin-orders";
+import { onRequestGet as listOrders, onRequestPatch as updateOrder } from "../functions/api/admin-orders";
+import { onRequestPost as recordVisitor } from "../functions/api/visitor";
 
 interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> };
@@ -19,6 +20,7 @@ export default {
       });
     }
     if (path.startsWith("/api/orders") && request.method === "POST") return createOrder({ request, env: configuredEnv });
+    if (path === "/api/visitor" && request.method === "POST") return recordVisitor({ request, env: configuredEnv });
     if (path.startsWith("/api/admin-orders") && request.method === "GET") {
       try {
         return await listOrders({ request, env: configuredEnv });
@@ -26,6 +28,7 @@ export default {
         return Response.json({ error: "The dashboard service is not available yet." }, { status: 500 });
       }
     }
+    if (path.startsWith("/api/admin-orders") && request.method === "PATCH") return updateOrder({ request, env: configuredEnv });
     return env.ASSETS.fetch(request);
   },
 };

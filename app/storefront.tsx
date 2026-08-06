@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   calculateTotals,
   FREE_DELIVERY_AT,
@@ -50,6 +50,11 @@ const products: Product[] = [
 
 const price = UNIT_PRICE_CENTS / 100;
 const freeDeliveryAt = FREE_DELIVERY_AT;
+const cartStorageKey = "chrome-leb-cart-v1";
+
+function recordStoreEvent(event: "visit" | "bag_open") {
+  fetch("/api/visitor", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ event }), keepalive: true }).catch(() => undefined);
+}
 
 export function Storefront() {
   const [cart, setCart] = useState<Cart>({});
@@ -60,6 +65,15 @@ export function Storefront() {
   const [orderNumber, setOrderNumber] = useState("");
   const [error, setError] = useState("");
   const [bagNotice, setBagNotice] = useState("");
+
+  useEffect(() => {
+    try { const saved = window.localStorage.getItem(cartStorageKey); if (saved) setCart(JSON.parse(saved) as Cart); } catch { /* Storage can be blocked in private browsing. */ }
+    recordStoreEvent("visit");
+  }, []);
+
+  useEffect(() => { try { window.localStorage.setItem(cartStorageKey, JSON.stringify(cart)); } catch { /* no-op */ } }, [cart]);
+
+  function openBag() { setCartOpen(true); recordStoreEvent("bag_open"); }
 
   const itemCount = useMemo(
     () => Object.values(cart).reduce((sum, quantity) => sum + quantity, 0),
@@ -166,7 +180,7 @@ export function Storefront() {
         <div className="nav-actions">
           <button
             className="cart-button"
-            onClick={() => setCartOpen(true)}
+            onClick={openBag}
             aria-label={`Open bag with ${itemCount} items`}
           >
             Bag <span>{String(itemCount).padStart(2, "0")}</span>
@@ -191,10 +205,9 @@ export function Storefront() {
             <em>the markup.</em>
           </h1>
           <p className="hero-note">
-            Blue-light-filtering, fashion-first frames for everyday wear. One honest price,
-            delivered to your door.
+            Fashion-first frames from $16. Cash on delivery across Lebanon, with free delivery when you choose any 3 pairs.
           </p>
-          <p className="hero-offer">BUY 3 · GET FREE DELIVERY</p>
+          <p className="hero-offer"><s>$25</s> <strong>$16 EACH</strong> · BUY 3, GET FREE DELIVERY</p>
           <a className="primary-cta" href="#collection">
             Explore the collection
             <span aria-hidden="true">↘</span>
@@ -261,6 +274,7 @@ export function Storefront() {
                 <div className="product-price"><s>$25</s><strong>${price}</strong></div>
               </div>
               <p className="product-description">{product.description}</p>
+              <details className="product-details"><summary>Frame details <span>+</span></summary><p>Clear demo lenses. Frame measurements, material, fit, and care details are coming soon.</p></details>
             </article>
           ))}
         </div>
@@ -276,9 +290,9 @@ export function Storefront() {
           <p className="eyebrow">The three-frame rule</p>
           <h2>Three frames.<br />$48 delivered.</h2>
           <p>
-            Choose any three pairs and we cover the $5 delivery fee. Three looks, one $48 order, nothing extra at checkout.
+            Choose any three pairs and we cover the $5 delivery fee. Your choices, one $48 order, nothing extra at checkout.
           </p>
-          <button className="text-link" onClick={() => { setCart({ nocturne: 1, lucent: 1, "smoke-arc": 1 }); setBagNotice("Your three-frame trio is in the bag. Delivery is free."); }}>Add the trio to bag <span>→</span></button>
+          <a className="text-link" href="#collection">Choose any 3 frames <span>→</span></a>
         </div>
       </section>
 
@@ -307,6 +321,11 @@ export function Storefront() {
         <div><strong>COD</strong><span>Pay at your door</span></div>
       </section>
 
+      <section className="support-strip section-shell">
+        <div><p className="eyebrow">Order support</p><h2>Questions before you order?</h2><p>Message the owner for delivery confirmation or help choosing a frame.</p></div>
+        <a className="support-whatsapp" href="https://wa.me/96179127268" target="_blank" rel="noreferrer">WhatsApp 79 127 268 <span>→</span></a>
+      </section>
+
       <section className="faq section-shell" id="faq">
         <div>
           <p className="eyebrow">Need to know</p>
@@ -321,6 +340,8 @@ export function Storefront() {
             <summary>When is delivery free?<span>+</span></summary>
             <p>Add any three or more pairs. The $5 fee is removed automatically.</p>
           </details>
+          <details><summary>How long does delivery take?<span>+</span></summary><p>We confirm your order by phone or WhatsApp before arranging delivery.</p></details>
+          <details><summary>Can I exchange a frame?<span>+</span></summary><p><strong>Owner action needed:</strong> add your exchange terms here before accepting orders.</p></details>
           <details>
             <summary>Is Chrome Leb an official manufacturer store?<span>+</span></summary>
             <p>The products are independently sourced and sold by Chrome Leb. Chrome Leb is not an official manufacturer store.</p>
@@ -337,13 +358,13 @@ export function Storefront() {
         <div className="footer-brand">CHROME LEB</div>
         <div className="footer-grid">
           <div><span>Shop</span><a href="#collection">Collection</a><a href="#faq">Delivery</a></div>
-          <div><span>Contact</span><a href="mailto:hello@vantaire.shop">Email</a><a href="#top">Instagram</a></div>
+          <div><span>Contact</span><a href="https://wa.me/96179127268" target="_blank" rel="noreferrer">WhatsApp</a><a href="tel:+96179127268">79 127 268</a></div>
           <div><span>Information</span><a href="#story">About</a><a href="#faq">FAQ</a></div>
           <p>© 2026 Chrome Leb<br />Independent eyewear retailer, Lebanon.</p>
         </div>
       </footer>
 
-      <button className="mobile-shop" onClick={() => setCartOpen(true)}>
+      <button className="mobile-shop" onClick={openBag}>
         Bag ({itemCount}) <span>${total}</span>
       </button>
 
