@@ -4,7 +4,8 @@ import { FormEvent, useMemo, useState } from "react";
 
 type Order = { orderNumber: string; customerName: string; phone: string; city: string; address: string; notes?: string; items: Array<{ productId: string; quantity: number }>; itemCount: number; totalCents: number; status: string; createdAt: string };
 const money = (cents: number) => `$${(cents / 100).toFixed(0)}`;
-const frameName = (id: string) => ({ nocturne: "Black Silver", lucent: "Crystal Gold", "smoke-arc": "Crystal Silver", umber: "Black Gold" }[id] ?? id);
+const frameNames: Record<string, string> = { nocturne: "Black Silver", lucent: "Crystal Gold", "smoke-arc": "Crystal Silver", umber: "Black Gold" };
+const frameName = (id: string) => frameNames[id] ?? id;
 
 export default function AdminPage() {
   const [code, setCode] = useState("");
