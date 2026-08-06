@@ -4,7 +4,11 @@ interface Env { SUPABASE_URL: string; SUPABASE_SERVICE_ROLE_KEY: string; }
 type FunctionContext<T> = { request: Request; env: T };
 const productIds = new Set(["nocturne", "lucent", "smoke-arc", "umber"]);
 const clean = (value: unknown, max: number) => typeof value === "string" ? value.trim().replace(/[<>]/g, "").slice(0, max) : "";
-const serverHeaders = (key: string) => key.startsWith("eyJ") ? { apikey: key, Authorization: `Bearer ${key}` } : { apikey: key };
+const serverHeaders = (key: string): Record<string, string> => {
+  const headers: Record<string, string> = { apikey: key };
+  if (key.startsWith("eyJ")) headers.Authorization = `Bearer ${key}`;
+  return headers;
+};
 
 export const onRequestPost = async ({ request, env }: FunctionContext<Env>) => {
   try {

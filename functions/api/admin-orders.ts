@@ -1,6 +1,10 @@
 interface Env { SUPABASE_URL: string; SUPABASE_SERVICE_ROLE_KEY: string; ADMIN_ACCESS_CODE: string; }
 type FunctionContext<T> = { request: Request; env: T };
-const serverHeaders = (key: string) => key.startsWith("eyJ") ? { apikey: key, Authorization: `Bearer ${key}` } : { apikey: key };
+const serverHeaders = (key: string): Record<string, string> => {
+  const headers: Record<string, string> = { apikey: key };
+  if (key.startsWith("eyJ")) headers.Authorization = `Bearer ${key}`;
+  return headers;
+};
 export const onRequestGet = async ({ request, env }: FunctionContext<Env>) => {
   const missing = [!env.SUPABASE_URL && "SUPABASE_URL", !env.SUPABASE_SERVICE_ROLE_KEY && "SUPABASE_SERVICE_ROLE_KEY"].filter(Boolean).join(", ");
   if (missing) return Response.json({ error: `Cloudflare is missing: ${missing}.` }, { status: 503 });
