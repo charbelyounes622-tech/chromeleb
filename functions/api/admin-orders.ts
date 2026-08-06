@@ -11,7 +11,7 @@ export const onRequestGet = async ({ request, env }: FunctionContext<Env>) => {
     const detail = await orders.text();
     return Response.json({ error: `Supabase could not load orders (status ${orders.status}): ${detail.slice(0, 180)}` }, { status: 500 });
   }
-  const rows = await orders.json() as Array<{ order_number: string; customer_name: string; phone: string; city: string; address: string; notes?: string; item_count: number; total_cents: number; status: string; created_at: string }>;
+  const rows = await orders.json() as Array<{ order_number: string; customer_name: string; phone: string; city: string; address: string; notes?: string; items?: unknown; item_count: number; total_cents: number; status: string; created_at: string }>;
   return Response.json({ orders: rows.map((row) => ({
     orderNumber: row.order_number,
     customerName: row.customer_name,
@@ -19,6 +19,7 @@ export const onRequestGet = async ({ request, env }: FunctionContext<Env>) => {
     city: row.city,
     address: row.address,
     notes: row.notes,
+    items: Array.isArray(row.items) ? row.items.filter((item): item is { productId: string; quantity: number } => !!item && typeof item === "object" && typeof (item as { productId?: unknown }).productId === "string" && typeof (item as { quantity?: unknown }).quantity === "number") : [],
     itemCount: row.item_count,
     totalCents: row.total_cents,
     status: row.status,
