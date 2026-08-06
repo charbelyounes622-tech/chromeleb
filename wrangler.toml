@@ -3,7 +3,7 @@ main = "src/index.ts"
 compatibility_date = "2026-07-29"
 
 [vars]
-SUPABASE_URL = "https://gzsbjwefmegxclhpoye.supabase.co"
+SUPABASE_URL = "https://gzsbjwvefmegxclhpoye.supabase.co"
 
 [assets]
 directory = "./out"
