@@ -93,7 +93,6 @@ export function Storefront() {
     const payload = {
       customerName: String(form.get("name") ?? ""),
       phone: String(form.get("phone") ?? ""),
-      email: String(form.get("email") ?? ""),
       city: String(form.get("city") ?? ""),
       address: String(form.get("address") ?? ""),
       notes: String(form.get("notes") ?? ""),
@@ -102,8 +101,10 @@ export function Storefront() {
         quantity,
       })),
     };
-    if (payload.customerName.trim().length < 2 || payload.phone.trim().length < 7 || payload.city.trim().length < 2 || payload.address.trim().length < 8) {
-      setError("Please add your name, phone number, area, and full delivery address.");
+    const phoneDigits = payload.phone.replace(/[\s-]/g, "");
+    const lebaneseMobile = /^(?:\+961|00961|0)?(?:3|70|71|76|78|79|81)\d{6}$/;
+    if (payload.customerName.trim().length < 2 || !lebaneseMobile.test(phoneDigits) || payload.city.trim().length < 2 || payload.address.trim().length < 8) {
+      setError("Please add your name, a valid Lebanese mobile number, area, and full delivery address.");
       return;
     }
 
@@ -413,15 +414,15 @@ export function Storefront() {
                 <span>Cash on delivery</span>
               </div>
               <form onSubmit={submitOrder} noValidate>
-                <label>Full name<input name="name" required minLength={2} autoComplete="name" /></label>
-                <div className="field-row">
-                  <label>Phone number<input name="phone" required minLength={7} inputMode="tel" autoComplete="tel" /></label>
-                  <label>Email <small>Optional</small><input name="email" type="email" autoComplete="email" /></label>
-                </div>
-                <a className="checkout-help" href="tel:+96179127268">Need help? 79 127 268</a>
+                <fieldset className="delivery-details">
+                  <legend>Delivery details</legend>
+                  <label>Full name<input name="name" required minLength={2} autoComplete="name" /></label>
+                  <label>Lebanese mobile number<input name="phone" required inputMode="tel" autoComplete="tel" placeholder="03 123 456" pattern="(?:\\+961|00961|0)?(?:3|70|71|76|78|79|81)[0-9]{6}" /></label>
+                  <a className="checkout-help" href="tel:+96179127268">Need help? 79 127 268</a>
                 <label>City / area<input name="city" required minLength={2} autoComplete="address-level2" /></label>
                 <label>Full delivery address<textarea name="address" required minLength={8} rows={3} autoComplete="street-address" /></label>
                 <label>Delivery notes <small>Optional</small><input name="notes" placeholder="Building, landmark, best time…" /></label>
+                </fieldset>
                 <div className="checkout-summary">
                   <p><span>{itemCount} {itemCount === 1 ? "pair" : "pairs"}</span><span>${subtotal}</span></p>
                   <p><span>Delivery</span><span>{delivery ? `$${delivery}` : "Free"}</span></p>
