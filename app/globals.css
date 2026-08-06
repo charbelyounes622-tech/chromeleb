@@ -21,6 +21,7 @@ body {
   overflow-x: hidden;
 }
 button, input, textarea { font: inherit; }
+button { touch-action: manipulation; }
 button, a { -webkit-tap-highlight-color: transparent; }
 a { color: inherit; text-decoration: none; }
 button { color: inherit; }
@@ -426,6 +427,8 @@ footer { background: #070707; padding: 100px 4vw 40px; }
 }
 .checkout-button:hover { background: white; }
 .checkout-button:disabled { opacity: .6; cursor: wait; }
+.checkout-button[aria-busy="true"] { position: relative; color: transparent; }
+.checkout-button[aria-busy="true"]::after { content: "Saving your order…"; position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink); }
 
 .checkout-modal { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; opacity: 0; pointer-events: none; transition: opacity .3s; padding: 20px; }
 .checkout-modal.is-open { opacity: 1; pointer-events: auto; }
@@ -536,6 +539,8 @@ footer { background: #070707; padding: 100px 4vw 40px; }
   .stepper { grid-column: 2; justify-self: start; }
   .checkout-modal { padding: 0; }
   .checkout-card { max-height: 100svh; height: 100svh; padding: 34px 20px 90px; border: 0; }
+  .checkout-card form { gap: 14px; }
+  .checkout-button { min-height: 52px; position: sticky; bottom: 8px; z-index: 2; box-shadow: 0 10px 28px rgba(0,0,0,.32); }
   .checkout-title h2 { font-size: 43px; }
   .checkout-title > span { position: static; display: block; margin-top: 12px; }
   .field-row { grid-template-columns: 1fr; }

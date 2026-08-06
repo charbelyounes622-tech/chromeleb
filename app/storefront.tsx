@@ -88,7 +88,6 @@ export function Storefront() {
 
   async function submitOrder(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSubmitting(true);
     setError("");
     const form = new FormData(event.currentTarget);
     const payload = {
@@ -108,11 +107,15 @@ export function Storefront() {
       return;
     }
 
+    setSubmitting(true);
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 12000);
     try {
       const response = await fetch("/api/orders", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(payload),
+        signal: controller.signal,
       });
       const result = (await response.json()) as {
         orderNumber?: string;
@@ -125,9 +128,12 @@ export function Storefront() {
       setCart({});
     } catch (caught) {
       setError(
-        caught instanceof Error ? caught.message : "Order could not be placed.",
+        caught instanceof DOMException && caught.name === "AbortError"
+          ? "This is taking longer than expected. Please try again or call 79 127 268."
+          : caught instanceof Error ? caught.message : "Order could not be placed.",
       );
     } finally {
+      window.clearTimeout(timeout);
       setSubmitting(false);
     }
   }
@@ -422,7 +428,7 @@ export function Storefront() {
                   <p><strong>Total due at door</strong><strong>${total}</strong></p>
                 </div>
                 {error && <p className="form-error" role="alert">{error}</p>}
-                <button className="checkout-button" disabled={submitting}>
+                <button className="checkout-button" disabled={submitting} aria-busy={submitting}>
                   {submitting ? "Placing order…" : `Place order · $${total}`}
                 </button>
                 <p className="checkout-note">No card needed. You’ll pay the courier in cash.</p>
