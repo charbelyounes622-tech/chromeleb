@@ -12,7 +12,7 @@ interface Env {
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const path = new URL(request.url).pathname;
-    const configuredEnv = { ...env, SUPABASE_URL: env.SUPABASE_URL || "https://gzsbjwvefmegxclhpoye.supabase.co" };
+    const configuredEnv = { ...env, SUPABASE_URL: "https://gzsbjwvefmegxclhpoye.supabase.co" };
     if (path === "/api/public-config" && request.method === "GET") {
       return Response.json({ supabaseUrl: configuredEnv.SUPABASE_URL, supabaseAnonKey: env.SUPABASE_ANON_KEY }, {
         headers: { "Cache-Control": "no-store" },
